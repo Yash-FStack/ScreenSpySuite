@@ -1,0 +1,37 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScreenSpyDetector", "ScreenSpyDetector\ScreenSpyDetector.csproj", "{D78F3DA2-5AA1-44E3-96F0-ED2F6E5AEABB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScreenSpyHook", "ScreenSpyHook\ScreenSpyHook.csproj", "{78D3D1A2-4623-4F91-88E2-F70E5AD7E4F0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScreenSpyInjector", "ScreenSpyInjector\ScreenSpyInjector.csproj", "{D1D8F7C6-9C83-4B11-8A38-2F9C7DB32E5C}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Build", "Build\Build.vdproj", "{2DBAAF76-3658-A355-2487-8F6EB773BBCA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D78F3DA2-5AA1-44E3-96F0-ED2F6E5AEABB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D78F3DA2-5AA1-44E3-96F0-ED2F6E5AEABB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D78F3DA2-5AA1-44E3-96F0-ED2F6E5AEABB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D78F3DA2-5AA1-44E3-96F0-ED2F6E5AEABB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{78D3D1A2-4623-4F91-88E2-F70E5AD7E4F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{78D3D1A2-4623-4F91-88E2-F70E5AD7E4F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{78D3D1A2-4623-4F91-88E2-F70E5AD7E4F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{78D3D1A2-4623-4F91-88E2-F70E5AD7E4F0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D1D8F7C6-9C83-4B11-8A38-2F9C7DB32E5C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1D8F7C6-9C83-4B11-8A38-2F9C7DB32E5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1D8F7C6-9C83-4B11-8A38-2F9C7DB32E5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1D8F7C6-9C83-4B11-8A38-2F9C7DB32E5C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2DBAAF76-3658-A355-2487-8F6EB773BBCA}.Debug|Any CPU.ActiveCfg = Debug
+		{2DBAAF76-3658-A355-2487-8F6EB773BBCA}.Release|Any CPU.ActiveCfg = Release
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
