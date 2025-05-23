@@ -1,7 +1,8 @@
-﻿using System;
+﻿using ScreenSpyKiller;
+using System;
 using System.Windows.Forms;
 
-namespace ScreenSpyDetector
+namespace ScreenCaptureDetector
 {
     static class Program
     {
