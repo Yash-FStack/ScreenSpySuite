@@ -3,45 +3,57 @@
     partial class Home
     {
         private System.ComponentModel.IContainer components = null;
-        private System.Windows.Forms.FlowLayoutPanel panelProcesses;
+        private System.Windows.Forms.CheckedListBox checkedListBox1;
         private System.Windows.Forms.Button btnKill;
-        private System.Windows.Forms.ListBox listBox;
+        private System.Windows.Forms.Label lblStatus;
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null)) components.Dispose();
+            base.Dispose(disposing);
+        }
 
         private void InitializeComponent()
         {
-            this.panelProcesses = new System.Windows.Forms.FlowLayoutPanel();
+            this.checkedListBox1 = new System.Windows.Forms.CheckedListBox();
             this.btnKill = new System.Windows.Forms.Button();
-            this.listBox = new System.Windows.Forms.ListBox();
+            this.lblStatus = new System.Windows.Forms.Label();
             this.SuspendLayout();
-
-            // panelProcesses
-            this.panelProcesses.AutoScroll = true;
-            this.panelProcesses.Location = new System.Drawing.Point(20, 20);
-            this.panelProcesses.Name = "panelProcesses";
-            this.panelProcesses.Size = new System.Drawing.Size(500, 250);
-
+            // 
+            // checkedListBox1
+            // 
+            this.checkedListBox1.CheckOnClick = true;
+            this.checkedListBox1.FormattingEnabled = true;
+            this.checkedListBox1.Location = new System.Drawing.Point(12, 25);
+            this.checkedListBox1.Size = new System.Drawing.Size(360, 214);
+            // 
             // btnKill
-            this.btnKill.Location = new System.Drawing.Point(20, 280);
-            this.btnKill.Name = "btnKill";
-            this.btnKill.Size = new System.Drawing.Size(200, 40);
-            this.btnKill.Text = "Kill and Continue";
+            // 
+            this.btnKill.Location = new System.Drawing.Point(130, 255);
+            this.btnKill.Size = new System.Drawing.Size(120, 30);
+            this.btnKill.Text = "Kill & Continue";
             this.btnKill.UseVisualStyleBackColor = true;
-            this.btnKill.Enabled = false;
             this.btnKill.Click += new System.EventHandler(this.btnKill_Click);
-
-            // listBox
-            this.listBox.FormattingEnabled = true;
-            this.listBox.Location = new System.Drawing.Point(20, 330);
-            this.listBox.Name = "listBox";
-            this.listBox.Size = new System.Drawing.Size(500, 95);
-
-            // Form1
-            this.ClientSize = new System.Drawing.Size(550, 450);
-            this.Controls.Add(this.listBox);
+            // 
+            // lblStatus
+            // 
+            this.lblStatus.Location = new System.Drawing.Point(12, 5);
+            this.lblStatus.Size = new System.Drawing.Size(360, 15);
+            this.lblStatus.Text = "Scanning for suspicious processes...";
+            // 
+            // Home
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(384, 311);
+            this.Controls.Add(this.checkedListBox1);
             this.Controls.Add(this.btnKill);
-            this.Controls.Add(this.panelProcesses);
-            this.Name = "Form1";
-            this.Text = "Suspicious Process Checker";
+            this.Controls.Add(this.lblStatus);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.MaximizeBox = false;
+            this.Name = "Home";
+            this.Text = "Screen Spy Killer";
+            this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
         }
     }

@@ -1,91 +1,190 @@
-﻿using System;
+﻿using Dapper;
+using System;
+using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
+using System.Timers;
 using System.Windows.Forms;
 
 namespace ScreenSpyKiller
 {
     public partial class Home : Form
     {
+        private Dictionary<string, int> currentProcesses = new(); // processName => PID
+        private Dictionary<string, DateTime> processStartTimes = new();
+        //private List<string> suspiciousNames = new() { "obs", "zoom", "team", "anydesk", "skype", "screen", "snagit", "vnc", "xsplit", "chrome", "edge" };
+        private List<string> suspiciousNames = new() { "team"};
+        private System.Timers.Timer monitorTimer;
+        private string logFilePath = "SuspiciousLog.txt";
+
         public Home()
         {
             InitializeComponent();
-            LoadProcesses();
+            StartMonitoring();
         }
 
-        private void LoadProcesses()
+        private void Form1_Load(object sender, EventArgs e)
         {
-            string[] suspiciousKeywords = {
-                "zoom", "teams", "skype", "obs", "vnc", "anydesk", "chrome",
-                "mstsc", "connect", "recorder", "capture", "snagit", "camstudio",
-                "screen", "stream", "share", "virtual", "mirror", "remote", "support",
-                "logmein", "teamviewer", "ultravnc", "xsplit", "screencast", "wirecast"
-            };
+            ScanProcesses();
+        }
 
-            var uniqueNames = Process.GetProcesses()
-                .Where(p =>
+        private void StartMonitoring()
+        {
+            monitorTimer = new System.Timers.Timer(5000); // 5 seconds
+            monitorTimer.Elapsed += MonitorTimer_Elapsed;
+            monitorTimer.Start();
+        }
+
+        private void MonitorTimer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            ScanProcesses();
+        }
+
+        private void ScanProcesses()
+        {
+            var allProcesses = Process.GetProcesses();
+            var foundNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var proc in allProcesses)
+            {
+                try
                 {
-                    try
+                    string name = proc.ProcessName.ToLower();
+                    if (suspiciousNames.Any(s => name.Contains(s)) && !name.Contains("detector"))
                     {
-                        string name = p.ProcessName.ToLower();
-                        return suspiciousKeywords.Any(k => name.Contains(k)) &&
-                               !name.Contains("screenspyguard") && !name.Contains("visualstudio");
+                        AddToListIfNew(name, proc.Id);
+                        foundNames.Add(name);
                     }
-                    catch { return false; }
-                })
-                .Select(p => p.ProcessName)
-                .Distinct()
-                .ToList();
-
-            if (uniqueNames.Count == 0)
-            {
-                listBox.Items.Add("✅ No suspicious processes found.");
-                btnKill.Enabled = false;
+                }
+                catch { continue; }
             }
-            else
+
+            // Remove closed processes
+            var toRemove = currentProcesses.Keys.Except(foundNames).ToList();
+
+            this.Invoke(() =>
             {
-                foreach (string name in uniqueNames)
+                foreach (var name in toRemove)
                 {
-                    var item = new CheckBox
+                    for (int i = 0; i < checkedListBox1.Items.Count; i++)
                     {
-                        Text = name,
-                        AutoSize = true
-                    };
-                    item.CheckedChanged += CheckBox_CheckedChanged;
-                    panelProcesses.Controls.Add(item);
+                        if (checkedListBox1.Items[i].ToString().Equals(name, StringComparison.OrdinalIgnoreCase))
+                        {
+                            checkedListBox1.Items.RemoveAt(i);
+                            break;
+                        }
+                    }
+
+                    if (processStartTimes.TryGetValue(name, out DateTime started))
+                    {
+                        var duration = DateTime.Now - started;
+                        File.AppendAllLines(logFilePath, new[]
+                        {
+                            $"{DateTime.Now:G} - CLOSED  - {name} | Active Duration: {duration}"
+                        });
+                    }
+
+                    currentProcesses.Remove(name);
+                    processStartTimes.Remove(name);
                 }
-            }
-
-            UpdateButtonState();
+            });
         }
 
-        private void CheckBox_CheckedChanged(object sender, EventArgs e)
+        private void AddToListIfNew(string procName, int pid)
         {
-            UpdateButtonState();
-        }
-
-        private void UpdateButtonState()
-        {
-            btnKill.Enabled = panelProcesses.Controls.OfType<CheckBox>().Any(cb => cb.Checked);
-        }
-
-        private void btnKill_Click(object sender, EventArgs e)
-        {
-            var toKill = panelProcesses.Controls.OfType<CheckBox>().Where(cb => cb.Checked).Select(cb => cb.Text);
-
-            foreach (string processName in toKill)
+            if (!currentProcesses.ContainsKey(procName))
             {
-                foreach (var proc in Process.GetProcessesByName(processName))
+                this.Invoke(() =>
                 {
-                    try { proc.Kill(); } catch { }
+                    checkedListBox1.Items.Add(procName);
+                    currentProcesses[procName] = pid;
+
+                    if (!processStartTimes.ContainsKey(procName))
+                        processStartTimes[procName] = DateTime.Now;
+
+                    lblStatus.Text = $"Detected: {procName}";
+
+                    File.AppendAllLines(logFilePath, new[]
+                    {
+                        $"{DateTime.Now:G} - STARTED - {procName} (PID: {pid})"
+                    });
+                });
+            }
+        }
+
+        private async void btnKill_Click(object sender, EventArgs e)
+        {
+            var killedList = new List<string>();
+
+            foreach (string selectedProc in checkedListBox1.CheckedItems.Cast<string>().ToList())
+            {
+                try
+                {
+                    int pid = currentProcesses[selectedProc];
+                    Process.GetProcessById(pid)?.Kill();
+
+                    File.AppendAllLines(logFilePath, new[]
+                    {
+                        $"{DateTime.Now:G} - MANUALLY KILLED - {selectedProc} (PID: {pid})"
+                    });
+
+                    lblStatus.Text = $"Killed: {selectedProc}";
+                    killedList.Add(selectedProc);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Failed to kill {selectedProc}: {ex.Message}");
                 }
             }
 
-            // Proceed to WebView2 form
-            BrowserView browserForm = new BrowserView();
-            browserForm.Show();
-            this.Hide();
+            ScanProcesses(); // Refresh
+
+            await Task.Delay(1000); // Slight delay to ensure UI refresh
+
+            // If all are cleared
+            if (checkedListBox1.Items.Count == 0)
+            {
+                await NotifyServerAllKilledAsync(killedList);
+            }
+        }
+
+        private async Task<string> NotifyServerAllKilledAsync(List<string> killedProcesses)
+        {
+            using HttpClient client = new();
+            try
+            {
+                string json = JsonSerializer.Serialize(new
+                {
+                    timestamp = DateTime.Now,
+                    killed = killedProcesses
+                });
+
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                var _connectionString = "server = 23.101.140.148; user id = dnh2020; password = mcn@123; database = SecureHire; TrustServerCertificate = True;";
+                using (var connection = new SqlConnection(_connectionString))
+                {
+                    await connection.OpenAsync();
+
+                    var email = "yash@gmail.com";
+                    var sql = "UPDATE ProctoringEvents SET ProcessesKilled = 1 WHERE Email = @Email";
+
+                    int rowsAffected = await connection.ExecuteAsync(sql, new { Email = email });
+
+                    return $"Rows updated: {rowsAffected}";
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return "";
+            }
         }
     }
 }
